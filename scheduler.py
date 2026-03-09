@@ -14,6 +14,8 @@ init_db()
 
 CHECK_INTERVAL_SECONDS = int(os.getenv("FOLLOWUP_CHECK_INTERVAL", "60"))
 
+from response_handler import process_all_replies
+
 def send_followup_task():
     now_iso = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
     due = get_due_followups(now_iso)
@@ -53,16 +55,28 @@ def send_followup_task():
         f"Run summary | checked={checked} sent={sent} skipped={skipped}"
     )
 
-
+def check_replies_task():
+    """Run every 15 minutes"""
+    process_all_replies()
 
 def run_scheduler_blocking():
     scheduler = BlockingScheduler()
     scheduler.add_job(send_followup_task, "interval", seconds=CHECK_INTERVAL_SECONDS, max_instances=1)
-    print(f"Follow-up scheduler started — checking every {CHECK_INTERVAL_SECONDS} seconds.")
+    scheduler.add_job(check_replies_task, "interval", minutes=15, max_instances=1)
+    print("=" * 60)
+    print("🤖 AI SDR Scheduler Started")
+    print("=" * 60)
+    print(f"✅ Follow-up checking: Every {CHECK_INTERVAL_SECONDS} seconds")
+    print(f"✅ Reply monitoring: Every 15 minutes")
+    print(f"✅ System ready — monitoring leads...")
+    print("=" * 60)
+    
     try:
         scheduler.start()
     except (KeyboardInterrupt, SystemExit):
-        print("Scheduler stopped.")
+        print("\n" + "=" * 60)
+        print("🛑 Scheduler stopped gracefully")
+        print("=" * 60)
 
 if __name__ == "__main__":
     run_scheduler_blocking()

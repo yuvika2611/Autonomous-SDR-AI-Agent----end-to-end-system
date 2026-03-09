@@ -1,0 +1,9 @@
+[
+  {
+    "email": "test@example.com",
+    "subject": "Following up \ud83d\ude42",
+    "body": "Hey, just checking in!",
+    "send_at": "2026-01-31T20:36:30.212082",
+    "sent": true
+  }
+]
